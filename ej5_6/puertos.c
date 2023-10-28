@@ -4,153 +4,110 @@
  *  Created on: 28 oct. 2023
  *      Author: fabrizio
  */
-
+//INCLUDES
 #include <stdio.h>
-#include <stdint.h>
 #include "puertos.h"
-
-typedef struct
-{
-    uint8_t b0 :1;
-    uint8_t b1 :1;
-    uint8_t b2 :1;
-    uint8_t b3 :1;
-    uint8_t b4 :1;
-    uint8_t b5 :1;
-    uint8_t b6 :1;
-    uint8_t b7 :1;
-} bit_a_bit_t;
-
-typedef struct
-{
-    bit_a_bit_t a;
-    bit_a_bit_t b;
-} BAB;
-
-typedef union
-{
-    BAB AB;
-    uint16_t D;
-} reg_t;
-
-reg_t reg = {.D = 0000000000000000};  // Crear una variable global de tipo reg_t para poder utilizarla en las funciones y macros
-void bitSet(char port, int bit);
-void bitClr(char port, int bit);
-void bitToggle(char port, int bit);
-void maskOn(char port, int mask);
-char mod_regd(int* bit);
-
-#define BIT(x) (b(x))
-#define BIT_SET_AB(p, c) (reg.AB.(p).b(c) = 1)
-#define BIT_CLR_AB(p, c) ( reg.AB.(p).b(c) = 0)
-#define BIT_GET_AB(p, c) ( reg.AB.(p).b##(c))
+#include "switch.h"
 
 
-
-void bitSet(char port, const int bit){
-	int x;
-	if(port == 'd'){
-		port = mod_regd(&bit);
+//FUNCION bitSet
+//Encargada de encender bits individualmente
+void bitSet(char port, int bit){
+	if(port == 'd'){	//Si se quiere trabajar con el puerto D
+		port = mod_regd(&bit);	//Analizamos si se trabaja con la parte que incluye el puerto A o el puerto B
 	}
-	switch(port){
-	case 'a':
-		//BIT_GET_AB(a, bit) = 1;
-		switch(bit){
-		case 0:
-			reg.AB.a.b0 = 1;
-			break;
-		case 1:
-			reg.AB.a.b1 = 1;
-			break;
-		case 2:
-			reg.AB.a.b2 = 1;
-			break;
-		case 3:
-			reg.AB.a.b3 = 1;
-			break;
-		case 4:
-			reg.AB.a.b4 = 1;
-			break;
-		case 5:
-			reg.AB.a.b5 = 1;
-			break;
-		case 6:
-			reg.AB.a.b6 = 1;
-			break;
-		case 7:
-			reg.AB.a.b7 = 1;
-			break;
-		default:
-			break;
-		}
-		break;
-	case 'b':
-		BIT_GET_AB('b', bit);
-		break;
-	default:
-		break;
-
-	}
-
+	swit1(port, bit); //Llama a la funcion swit1, que prende el bit solicitado
 }
 
+//FUNCION bitClr
+//Encargada de apagar bits individualmente
 void bitClr(char port, int bit){
-	if(port == 'd'){
-		port = mod_regd(&bit);
-		BIT_CLR_AB(port, bit);
+	if(port == 'd'){			//Si se quiere trabajar con el puerto D
+		port = mod_regd(&bit);	//Analizamos si se trabaja con la parte que incluye el puerto A o el puerto B
 	}
-	else{
-		BIT_CLR_AB(port, bit);
-	}
+	swit0(port, bit);			//Llama a la funcion swit0, que apaga el bit solicitado
 }
+
+//FUNCION bitGet
+//Encargada de devolver el estado de un bit
 
 int bitGet(char port, int bit){
-	int b;
-	if(port == 'd'){
-		port = mod_regd(&bit);
-		b = BIT_GET_AB(port, bit);
+	int estado;
+	if(port == 'd'){ 			//Si se quiere trabajar con el puerto D
+		port = mod_regd(&bit);	//Analizamos si se trabaja con la parte que incluye el puerto A o el puerto B
 	}
-	else{
-		b = BIT_GET_AB(port, bit);
-	}
-	return b;
+	estado = switGet(port, bit); 	//Llama a la funcion switGet, que devuelve el estado del bit solicitado
+
+	return estado;	//Devuelve el valor
 }
 
+//FUNCION bitToggle
+//Encargada de cambiar los bits a su estado opuesto
 void bitToggle(char port, int bit){
-	char p;
-	if(port == 'd'){
-		p = mod_regd(&bit);
-		if(BIT_GET_AB(p, bit) == 1){
-			BIT_CLR_AB(p, bit);
-		}
-		else{
-			BIT_SET_AB(p, bit);
-		}
+	int estado;
+	if(port == 'd'){			//Si se quiere trabajar con el puerto D
+		port = mod_regd(&bit);	//Analizamos si se trabaja con la parte que incluye el puerto A o el puerto B
+	}
+	estado = switGet(port, bit);	//Llama a la funcion switGet, que devuelve el estado del bit solicitado
+	if(estado == 1){	//Si esta encendido
+				swit0(port, bit);	//Llama a swit0 para apagarlo
 	}
 	else{
-		if(BIT_GET_AB(port, bit) == 1){
-			BIT_CLR_AB(port, bit);
-		}
-		else{
-			BIT_SET_AB(port, bit);
-		}
+				swit1(port, bit);	//Llama a swit 1 para encenderlo
 	}
 }
 
+//Funcion maskOn
+//Encargada de encender los bits coincidentes con una mascara
 void maskOn(char port, int mask){
-	if(port == 'a'){
-		reg.AB.a |= mask;
+	int nbit, bit , largo = 7;
+	if(port == 'd'){
+		largo = 15;
 	}
-	else if(port == 'b'){
-		reg.AB.b |= (bit_a_bit_t)mask;
+	int *puntero = hex2bin(largo, mask);
+		for(nbit = 0 , bit = 7; nbit <= largo ; nbit++ , bit--){
+			if(puntero[nbit] == 1){
+				bitSet(port, bit);
+			}
+		}
+}
+
+//Funcion maskOff
+//Encargada de apagar los bits coincidentes con una mascara
+void maskOff(char port, int mask){
+	int nbit, bit , largo = 7;
+	if(port == 'd'){
+		largo = 15;
 	}
-	else{
-		reg.D |= mask;
+	int *puntero = hex2bin(largo, mask);
+		for(nbit = 0 , bit = 7; nbit <= largo ; nbit++ , bit--){
+			if(puntero[nbit] == 1){
+				bitClr(port, bit);
+			}
+		}
+}
+
+//Funcion maskToggle
+//Encargada de cambiar el estado de los bits coincidentes con una mascara a su opuesto
+void maskToggle(char port, int mask){
+	int nbit, bit , largo = 7;
+	if(port == 'd'){
+		largo = 15;
 	}
+	int *puntero = hex2bin(largo, mask);
+		for(nbit = 0 , bit = 7; nbit <= largo ; nbit++ , bit--){
+			if(puntero[nbit] == 1){
+				bitToggle(port, bit);
+			}
+		}
 }
 
 
-//FUNCIONES AUX
+
+
+//FUNCIONES AUXILIARES
+
+//FUNCION mod_regd
 //Si se quiere modificar directamente el registro D
 char mod_regd(int *bit){
     char a = 'a',b = 'b';
@@ -163,5 +120,37 @@ char mod_regd(int *bit){
         (*bit) -= 8;
     	return b;
     }
-    return a;
+    return 0;
 }
+
+//Funcion hex2bin
+//Encargada de pasar un hexadecimal a binario
+int* hex2bin(int largo,int hexa){
+	int bin[largo];
+
+	switch (hexDigit) {
+	        case '0': bin[largo] = "0000";
+	        case '1': bin[largo] = "0001";
+	        case '2': bin[largo] = "0010";
+	        case '3': bin[largo] = "0011";
+	        case '4': bin[largo] = "0100";
+	        case '5': bin[largo] = "0101";
+	        case '6': bin[largo] = "0110";
+	        case '7': bin[largo] = "0111";
+	        case '8': bin[largo] = "1000";
+	        case '9': bin[largo] = "1001";
+	        case 'A': bin[largo] = "1010";
+	        case 'B': bin[largo] = "1011";
+	        case 'C': bin[largo] = "1100";
+	        case 'D': bin[largo] = "1101";
+	        case 'E': bin[largo] = "1110";
+	        case 'F': bin[largo] = "1111";
+	        default: return 0;
+	    }
+	}
+
+	return bin;
+}
+
+
+
