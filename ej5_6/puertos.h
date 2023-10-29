@@ -47,6 +47,7 @@ int bitGet(char port, int bit);			//Función encargada de devolver el estado de 
 void bitToggle(char port, int bit);		//Función encargada de cambiar los bits a su estado opuesto
 void maskOn(char port, int mask);		//Función encargada de encender los bits coincidentes con una mascara
 void maskOff(char port, int mask);		//Funcion encargada de apagar los bits coincidentes con una mascara
+void maskToggle(char port, int mask);	//Funcion encargada de cambiar el estado de los bits coincidentes con una mascara a su opuesto
 char mod_regd(int* bit);				//Función encargada de analizar si se trabaja con la parte A o B del puerto D
 
 #endif /* PUERTOS_H_ */

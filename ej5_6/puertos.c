@@ -12,10 +12,6 @@
 
 reg_t reg = {.D = 0}; // Crear una variable global de tipo reg_t para poder utilizarla en las funciones y macros
 
-int main(void){
-	return 0;
-}
-
 
 //FUNCION bitSet
 //Encargada de encender bits individualmente
@@ -68,13 +64,13 @@ void bitToggle(char port, int bit){
 //Encargada de encender los bits coincidentes con una mascara
 void maskOn(char port, int mask){
 	int nbit, bit , largo = 7, puntero[largo];
-	if(port == 'd'){
-		largo = 15;
+	if(port == 'd'){	//En el caso de que se trabaje con el puerto D
+		largo = 15;	//Modifica el largo del arreglo
 	}
-	hex2bin(largo, mask, puntero);
+	hex2bin(largo, mask, puntero);	//Llama a la funcion para armar el arreglo en binario
 		for(nbit = 0 , bit = 7; nbit <= largo ; nbit++ , bit--){
 			if(puntero[nbit] == 1){
-				bitSet(port, bit);
+				bitSet(port, bit);	//Llama a la funcion que enciende el bit
 			}
 		}
 }
@@ -83,13 +79,13 @@ void maskOn(char port, int mask){
 //Encargada de apagar los bits coincidentes con una mascara
 void maskOff(char port, int mask){
 	int nbit, bit , largo = 7, puntero[largo];
-	if(port == 'd'){
-		largo = 15;
+	if(port == 'd'){	//En el caso de que se trabaje con el puerto D
+		largo = 15;	//Modifica el largo del arreglo
 	}
-	hex2bin(largo, mask, puntero);
+	hex2bin(largo, mask, puntero);	//Llama a la funcion para armar el arreglo en binario
 	for(nbit = 0 , bit = 7; nbit <= largo ; nbit++ , bit--){
 		if(puntero[nbit] == 1){
-			bitClr(port, bit);
+			bitClr(port, bit);	//Llama a la funcion que apaga el bit
 		}
 	}
 }
@@ -98,13 +94,13 @@ void maskOff(char port, int mask){
 //Encargada de cambiar el estado de los bits coincidentes con una mascara a su opuesto
 void maskToggle(char port, int mask){
 	int nbit, bit , largo = 7, puntero[largo];
-	if(port == 'd'){
-		largo = 15;
+	if(port == 'd'){ //En el caso de que se trabaje con el puerto D
+		largo = 15;	//Modifica el largo del arreglo
 	}
-	hex2bin(largo, mask, puntero);
+	hex2bin(largo, mask, puntero);	//Llama a la funcion para armar el arreglo en binario
 		for(nbit = 0 , bit = 7; nbit <= largo ; nbit++ , bit--){
 			if(puntero[nbit] == 1){
-				bitToggle(port, bit);
+				bitToggle(port, bit);	//Llama a la funcion para cambiar el estado del bit solicitado
 			}
 		}
 }

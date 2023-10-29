@@ -27,7 +27,7 @@ char mod_regd(int *bit){
 
 //Funcion hex2bin
 //Encargada de pasar un hexadecimal a binario
-void hex2bin(int largo, int hexa, int * bin){
+void hex2bin(int largo, char hexa, int * bin){
 	int i;
 
 	switch (hexa) {
