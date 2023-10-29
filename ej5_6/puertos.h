@@ -39,9 +39,6 @@ typedef union
     uint16_t D;
 } reg_t;
 
-//VARIABLE GLOBAL
-reg_t reg = {.D = 0}; // Crear una variable global de tipo reg_t para poder utilizarla en las funciones y macros
-
 //PROTOTIPOS
 
 void bitSet(char port, int bit);		//Función encargada de prender bits individualmente
@@ -51,7 +48,5 @@ void bitToggle(char port, int bit);		//Función encargada de cambiar los bits a 
 void maskOn(char port, int mask);		//Función encargada de encender los bits coincidentes con una mascara
 void maskOff(char port, int mask);		//Funcion encargada de apagar los bits coincidentes con una mascara
 char mod_regd(int* bit);				//Función encargada de analizar si se trabaja con la parte A o B del puerto D
-int* hex2bin(int largo, int hexa);		//Función encargada de pasar un hexadecimal a binario
-void maskToggle(char port, int mask);	//Función encargada de cambiar el estado de los bits coincidentes con una mascara a su opuesto
 
 #endif /* PUERTOS_H_ */

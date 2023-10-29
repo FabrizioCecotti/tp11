@@ -8,6 +8,13 @@
 #include <stdio.h>
 #include "puertos.h"
 #include "switch.h"
+#include "aux.h"
+
+reg_t reg = {.D = 0}; // Crear una variable global de tipo reg_t para poder utilizarla en las funciones y macros
+
+int main(void){
+	return 0;
+}
 
 
 //FUNCION bitSet
@@ -50,21 +57,21 @@ void bitToggle(char port, int bit){
 	}
 	estado = switGet(port, bit);	//Llama a la funcion switGet, que devuelve el estado del bit solicitado
 	if(estado == 1){	//Si esta encendido
-				swit0(port, bit);	//Llama a swit0 para apagarlo
+		swit0(port, bit);	//Llama a swit0 para apagarlo
 	}
 	else{
-				swit1(port, bit);	//Llama a swit 1 para encenderlo
+		swit1(port, bit);	//Llama a swit 1 para encenderlo
 	}
 }
 
 //Funcion maskOn
 //Encargada de encender los bits coincidentes con una mascara
 void maskOn(char port, int mask){
-	int nbit, bit , largo = 7;
+	int nbit, bit , largo = 7, puntero[largo];
 	if(port == 'd'){
 		largo = 15;
 	}
-	int *puntero = hex2bin(largo, mask);
+	hex2bin(largo, mask, puntero);
 		for(nbit = 0 , bit = 7; nbit <= largo ; nbit++ , bit--){
 			if(puntero[nbit] == 1){
 				bitSet(port, bit);
@@ -75,82 +82,29 @@ void maskOn(char port, int mask){
 //Funcion maskOff
 //Encargada de apagar los bits coincidentes con una mascara
 void maskOff(char port, int mask){
-	int nbit, bit , largo = 7;
+	int nbit, bit , largo = 7, puntero[largo];
 	if(port == 'd'){
 		largo = 15;
 	}
-	int *puntero = hex2bin(largo, mask);
-		for(nbit = 0 , bit = 7; nbit <= largo ; nbit++ , bit--){
-			if(puntero[nbit] == 1){
-				bitClr(port, bit);
-			}
+	hex2bin(largo, mask, puntero);
+	for(nbit = 0 , bit = 7; nbit <= largo ; nbit++ , bit--){
+		if(puntero[nbit] == 1){
+			bitClr(port, bit);
 		}
+	}
 }
 
 //Funcion maskToggle
 //Encargada de cambiar el estado de los bits coincidentes con una mascara a su opuesto
 void maskToggle(char port, int mask){
-	int nbit, bit , largo = 7;
+	int nbit, bit , largo = 7, puntero[largo];
 	if(port == 'd'){
 		largo = 15;
 	}
-	int *puntero = hex2bin(largo, mask);
+	hex2bin(largo, mask, puntero);
 		for(nbit = 0 , bit = 7; nbit <= largo ; nbit++ , bit--){
 			if(puntero[nbit] == 1){
 				bitToggle(port, bit);
 			}
 		}
 }
-
-
-
-
-//FUNCIONES AUXILIARES
-
-//FUNCION mod_regd
-//Si se quiere modificar directamente el registro D
-char mod_regd(int *bit){
-    char a = 'a',b = 'b';
-    //Si son los primeros 8 bits significa que se quiere modificar el registro A
-    if((0 <= (*bit)) && ((*bit)<= 7)){
-        return a;
-    }
-    //Si son los ultimos 8 bits significa que se quiere modificar el registro B
-    else if((8 <= (*bit)) && ((*bit)<= 15)){
-        (*bit) -= 8;
-    	return b;
-    }
-    return 0;
-}
-
-//Funcion hex2bin
-//Encargada de pasar un hexadecimal a binario
-int* hex2bin(int largo,int hexa){
-	int bin[largo];
-
-	switch (hexDigit) {
-	        case '0': bin[largo] = "0000";
-	        case '1': bin[largo] = "0001";
-	        case '2': bin[largo] = "0010";
-	        case '3': bin[largo] = "0011";
-	        case '4': bin[largo] = "0100";
-	        case '5': bin[largo] = "0101";
-	        case '6': bin[largo] = "0110";
-	        case '7': bin[largo] = "0111";
-	        case '8': bin[largo] = "1000";
-	        case '9': bin[largo] = "1001";
-	        case 'A': bin[largo] = "1010";
-	        case 'B': bin[largo] = "1011";
-	        case 'C': bin[largo] = "1100";
-	        case 'D': bin[largo] = "1101";
-	        case 'E': bin[largo] = "1110";
-	        case 'F': bin[largo] = "1111";
-	        default: return 0;
-	    }
-	}
-
-	return bin;
-}
-
-
-
